@@ -1,0 +1,15 @@
+doctype html
+html(lang="en")
+  head
+    title IF–CHOICE Connected Devices
+    meta(name="viewport" charset="utf-8" content="width=device-width" initial-scale="1.0")
+    script(type="text/javascript" src="/public/javascripts/jquery.js")
+    script(type="text/javascript" src="/public/javascripts/socket.io.js")
+    script(type="text/javascript" src="/public/javascripts/app.js")
+    link(rel="stylesheet" type="text/css" href="/public/stylesheets/app.css")
+  body
+    div(id="container")
+      div(id="device_list")
+        h1 Devices connected to your router
+        ul
+        a(id="refresh_button" href="#") Refresh
