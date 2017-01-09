@@ -33,7 +33,7 @@ app.get('/', function(req, res) {
 app.post('/remove', function(req, res) {
   let mac_address = req.body.mac_address;
 
-  console.log("removing " + mac_address);
+  removeClient(mac_address);
 
   fs.appendFile('known.txt', ';' + mac_address);
 
@@ -42,8 +42,6 @@ app.post('/remove', function(req, res) {
 
 app.post('/ignore', function(req, res) {
   let mac_address = req.body.mac_address;
-
-  console.log("ignoring " + mac_address);
 
   fs.appendFile('known.txt', ';' + mac_address);
 
@@ -149,6 +147,17 @@ function update() {
       });
 
       io.sockets.emit('update_response', matched_connected_devices);
+    });
+  });
+}
+
+function removeClient(mac_address) {
+  // Append line to dhcpd.conf to prevent blocked MAC address
+  // from getting a new IP address after disconnect
+  fs.appendFile('/etc/dhcp/dhcpd.conf', 'host block-me { hardware ethernet ' + mac_address + '; deny booting; }\n', function() {
+    child.execFile('service', ['isc-dhcp-server', 'restart'], function(err, stdout, stderr) {
+      child.execFile('hostapd_cli', ['deauthenticate', mac_address], function(err, stdout, stderr) {
+      });
     });
   });
 }
