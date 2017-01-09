@@ -6,6 +6,9 @@ var path = require('path');
 var app = express();
 var http = require('http').Server(app);
 var child = require('child_process');
+var io = require('socket.io')(http);
+var fs = require('fs');
+var bodyParser = require('body-parser')
 
 // RUNTIME VARIABLES
 let dhcp_devices = [];
@@ -16,6 +19,10 @@ let matched_connected_devices = [];
 app.set('port', process.env.PORT || 3000);
 app.set('view engine', 'jade');
 app.use('/public', express.static(path.join(__dirname, 'public')));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
 
 // ROUTES
 // Render the app view
@@ -23,7 +30,35 @@ app.get('/', function(req, res) {
   res.render('index');
 });
 
-app.get('/latest', function(req, res) {
+app.post('/remove', function(req, res) {
+  let mac_address = req.body.mac_address;
+
+  console.log("removing " + mac_address);
+
+  fs.appendFile('known.txt', ';' + mac_address);
+
+  res.sendStatus(200);
+});
+
+app.post('/ignore', function(req, res) {
+  let mac_address = req.body.mac_address;
+
+  console.log("ignoring " + mac_address);
+
+  fs.appendFile('known.txt', ';' + mac_address);
+
+  res.sendStatus(200);
+});
+
+// SOCKET.IO
+// When the UI asked for an update, respond
+io.on('connection', function (socket) {
+  socket.on('update_call', function (data) {
+    update();
+  });
+});
+
+function update() {
   dhcp_devices = [];
   connected_devices = [];
   matched_connected_devices = [];
@@ -54,7 +89,7 @@ app.get('/latest', function(req, res) {
         }
       }
 
-      if (typeof hostname !== "undefined") {
+      if (typeof hostname != "undefined") {
         dhcp_devices.push({
           "mac_address": mac_address,
           "hostname": hostname
@@ -90,17 +125,35 @@ app.get('/latest', function(req, res) {
           "hostname": hostname
         });
       }
-      
-      res.json(matched_connected_devices);
+
+      fs.readFile('known.txt', 'utf8', function (err, data) {
+        // Split known mac address into array
+        let knownMacAddresses = data.split(';')
+
+        for (let device in matched_connected_devices) {
+          let newDevice = matched_connected_devices[device]['mac_address'];
+          let match = false;
+
+          for (let address in knownMacAddresses) {
+            let knownDevice = knownMacAddresses[address];
+
+            if (newDevice === knownDevice) {
+              match = true;
+            }
+          }
+
+          if (!match) {
+            io.sockets.emit('new_device', matched_connected_devices[device]);
+          }
+        }
+      });
+
+      io.sockets.emit('update_response', matched_connected_devices);
     });
   });
-});
+}
 
 // SERVER
 http.listen(app.get('port'), function() {
-	console.log("Server started on :" + app.get('port'));
+  console.log("Server started on :" + app.get('port'));
 });
-
-function getConnectedDevices() {
-
-}
