@@ -90,8 +90,7 @@ app.get('/latest', function(req, res) {
           "hostname": hostname
         });
       }
-
-
+      
       res.json(matched_connected_devices);
     });
   });

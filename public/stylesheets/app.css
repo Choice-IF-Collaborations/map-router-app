@@ -105,3 +105,46 @@ h2 {
     position: absolute;
     bottom: 2em;
     left: calc((100% / 2) - 100px); }
+
+.notification {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(800px - 4em);
+  height: calc(478px - 4em);
+  background: #FFF;
+  padding: 2em;
+  display: flex;
+  justify-content: center;
+  align-items: center; }
+  .notification div {
+    overflow: auto; }
+  .notification .icon {
+    width: 200px;
+    float: left;
+    margin-right: 1em; }
+  .notification .details {
+    width: 500px;
+    float: left; }
+    .notification .details h2 {
+      font-size: 1.2em;
+      line-height: 1.2em;
+      font-weight: 700;
+      margin-bottom: 2em; }
+    .notification .details p {
+      line-height: 1.2em;
+      margin-bottom: 2em; }
+      .notification .details p:last-of-type {
+        margin-bottom: 0; }
+      .notification .details p .remove_device,
+      .notification .details p .ignore_device {
+        background-color: #808080;
+        color: #FFF;
+        width: 200px;
+        height: 50px;
+        line-height: 50px;
+        display: block;
+        text-decoration: none;
+        float: left;
+        margin-right: 0.5em;
+        text-align: center; }

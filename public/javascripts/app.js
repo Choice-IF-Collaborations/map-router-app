@@ -1,4 +1,6 @@
 $(window).load(function() {
+  let notificationCounter = 0;
+
   // Runtime variables
   //var socket = io();
 
@@ -8,7 +10,6 @@ $(window).load(function() {
   //});
 
   updateNetworks();
-
 
   $('#refresh_button').click(function(e) {
     e.preventDefault();
@@ -32,4 +33,34 @@ $(window).load(function() {
   setInterval(function() {
     updateNetworks();
   }, 5000);
+
+  function createNotification(deviceName) {
+    notificationCounter++;
+
+    let $notificationTemplate = $('#notification_template').clone();
+    $notificationTemplate.attr('id', 'notification_' + notificationCounter);
+    $notificationTemplate.find('.device_name').text(deviceName);
+    $notificationTemplate.css({ 'display': 'flex' });
+    $('#notifications').append($notificationTemplate);
+  }
+
+  $('body').on('click', '.remove_device', function(e) {
+    e.preventDefault();
+
+    let $parent = $(this).parent().parent().parent().parent();
+
+    $parent.fadeOut(250, function() {
+      $parent.remove();
+    });
+  });
+
+  $('body').on('click', '.ignore_device', function(e) {
+    e.preventDefault();
+
+    let $parent = $(this).parent().parent().parent().parent();
+
+    $parent.fadeOut(250, function() {
+      $parent.remove();
+    });
+  });
 });
