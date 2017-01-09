@@ -98,55 +98,61 @@ function update() {
     child.execFile('iw', ['dev', 'wlan0', 'station', 'dump'], function(err, stdout, stderr) {
       let connectedStations = stdout;
 
-      connectedStations = connectedStations.split("Station");
+      fs.readFile('blacklist.txt', 'utf8', function(err, blacklist_data) {
+        let blacklistedDevices = blacklist_data.split(';');
 
-      connectedStations.shift();
+        connectedStations = connectedStations.split("Station");
 
-      for (let station in connectedStations) {
-        station = connectedStations[station].split('\n')[0];
-        station = station.split(' ')[1].replace(' ', '');
-        connected_devices.push(station);
-      }
+        connectedStations.shift();
 
-      for (let device in connected_devices) {
-        let mac_address = connected_devices[device];
-        let hostname;
-
-        for (let dhcp_device in dhcp_devices) {
-          if (dhcp_devices[dhcp_device]["mac_address"] === mac_address) {
-            hostname = dhcp_devices[dhcp_device]["hostname"];
-          }
+        for (let station in connectedStations) {
+          station = connectedStations[station].split('\n')[0];
+          station = station.split(' ')[1].replace(' ', '');
+          connected_devices.push(station);
         }
 
-        matched_connected_devices.push({
-          "mac_address": mac_address,
-          "hostname": hostname
-        });
-      }
+        for (let device in connected_devices) {
+          let mac_address = connected_devices[device];
+          let hostname;
 
-      fs.readFile('known.txt', 'utf8', function (err, data) {
-        // Split known mac address into array
-        let knownMacAddresses = data.split(';')
-
-        for (let device in matched_connected_devices) {
-          let newDevice = matched_connected_devices[device]['mac_address'];
-          let match = false;
-
-          for (let address in knownMacAddresses) {
-            let knownDevice = knownMacAddresses[address];
-
-            if (newDevice === knownDevice) {
-              match = true;
+          for (let dhcp_device in dhcp_devices) {
+            if (dhcp_devices[dhcp_device]["mac_address"] === mac_address) {
+              hostname = dhcp_devices[dhcp_device]["hostname"];
             }
           }
 
-          if (!match) {
-            io.sockets.emit('new_device', matched_connected_devices[device]);
+          if (blacklistedDevices.indexOf(mac_address) === -1) {
+            matched_connected_devices.push({
+              "mac_address": mac_address,
+              "hostname": hostname
+            });
           }
         }
-      });
 
-      io.sockets.emit('update_response', matched_connected_devices);
+        fs.readFile('known.txt', 'utf8', function(err, data) {
+          // Split known mac address into array
+          let knownMacAddresses = data.split(';')
+
+          for (let device in matched_connected_devices) {
+            let newDevice = matched_connected_devices[device]['mac_address'];
+            let match = false;
+
+            for (let address in knownMacAddresses) {
+              let knownDevice = knownMacAddresses[address];
+
+              if (newDevice === knownDevice) {
+                match = true;
+              }
+            }
+
+            if (!match) {
+              io.sockets.emit('new_device', matched_connected_devices[device]);
+            }
+          }
+        });
+
+        io.sockets.emit('update_response', matched_connected_devices);
+      });
     });
   });
 }
@@ -157,6 +163,7 @@ function removeClient(mac_address) {
   fs.appendFile('/etc/dhcp/dhcpd.conf', 'host block-me { hardware ethernet ' + mac_address + '; deny booting; }\n', function() {
     child.execFile('service', ['isc-dhcp-server', 'restart'], function(err, stdout, stderr) {
       child.execFile('hostapd_cli', ['deauthenticate', mac_address], function(err, stdout, stderr) {
+        fs.appendFile('blacklist.txt', ';' + mac_address);
       });
     });
   });
