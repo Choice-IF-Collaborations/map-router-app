@@ -39,6 +39,7 @@ It also:
 5. Run `passwd` to change the default password.
 6. Install latest updates with `sudo apt-get update && sudo apt-get upgrade -y`. Reboot.
 7. If required, install drivers for the USB Wi-Fi adaptor. The TP-LINK TL-WN823N was installed with these commands:
+
   ```
   wget https://dl.dropboxusercontent.com/u/80256631/install-wifi.tar.gz
   tar xzf install-wifi.tar.gz
@@ -52,15 +53,18 @@ It also:
   **Note**: `iptables-persistent` will prompt you twice. Answer "Yes" each time.
 2. Run `sudo nano /etc/dhcp/dhcpd.conf`.
 3. Comment out these lines:
+
   ```
   option domain-name "example.org";
   option domain-name-servers ns1.example.org, ns2.example.org;
   ```
 4. Uncomment this line:
+
   ```
   authoritative;
   ```
 5. Add these lines to the bottom of the file:
+
   ```
   subnet 192.168.42.0 netmask 255.255.255.0 {
       range 192.168.42.10 192.168.42.50;
@@ -79,6 +83,7 @@ It also:
 10. Run `sudo ifdown wlan0` to turn off the Wi-Fi adaptor.
 11. Run `sudo nano /etc/network/interfaces`.
 12. Replace the entire file with the following:
+
   ```
   auto lo
 
@@ -94,6 +99,7 @@ It also:
 14. Run `sudo ifconfig wlan0 192.168.42.1`.
 15. Run `sudo nano /etc/hostapd/hostapd.conf`.
 16. Paste the following into the file. Change `wpa_passphrase=XXXXXX` to something else.
+
   ```
   interface=wlan0
   ssid=CHOICE-Router
@@ -123,6 +129,7 @@ It also:
 25. At the bottom of the file add `net.ipv4.ip_forward=1`.
 26. Save and exit.
 27. Run the following commands:
+
   ```
   sudo sh -c "echo 1 > /proc/sys/net/ipv4/ip_forward"
   sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
@@ -132,6 +139,7 @@ It also:
   ```
 28. Run `sudo /usr/sbin/hostapd /etc/hostapd/hostapd.conf` and check if the Wi-Fi access point has started. Press `CTRL + C` to exit this test.
 29. Run the following commands:
+
   ```
   sudo service hostapd start
   sudo service isc-dhcp-server start
