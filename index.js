@@ -8,12 +8,18 @@ var http = require('http').Server(app);
 var child = require('child_process');
 var io = require('socket.io')(http);
 var fs = require('fs');
-var bodyParser = require('body-parser')
+var bodyParser = require('body-parser');
+var sqlite3 = require('sqlite3').verbose();
+var db = new sqlite3.Database('router.db');
+var async = require('async');
 
 // RUNTIME VARIABLES
-let dhcp_devices = [];
-let connected_devices = [];
-let matched_connected_devices = [];
+let listFileHostnames = [];
+let listConnectedDevices = [];
+let listConnectedDevicesWithInfo = [];
+let listAllowedDevices = [];
+let listKnownHostnames = [];
+let listKnownDeviceInfo = [];
 
 // CONFIG
 app.set('port', process.env.PORT || 3000);
@@ -35,17 +41,27 @@ app.post('/remove', function(req, res) {
 
   removeClient(mac_address);
 
-  fs.appendFile('known.txt', ';' + mac_address);
-
-  res.sendStatus(200);
+  db.run("INSERT INTO devices(type, mac_address, timestamp_connected, is_blocked, snooze_period) VALUES($type, $mac_address, $timestamp_connected, $is_blocked, $snooze_period)", {
+    $type: "unknown",
+    $mac_address: mac_address,
+    $timestamp_connected: Math.floor(Date.now() / 1000),
+    $is_blocked: 1,
+    $snooze_period: 0
+  }, function() {
+    res.sendStatus(200);
+  });
 });
 
 app.post('/ignore', function(req, res) {
-  let mac_address = req.body.mac_address;
-
-  fs.appendFile('known.txt', ';' + mac_address);
-
-  res.sendStatus(200);
+  db.run("INSERT INTO devices(type, mac_address, timestamp_connected, is_blocked, snooze_period) VALUES($type, $mac_address, $timestamp_connected, $is_blocked, $snooze_period)", {
+    $type: "unknown",
+    $mac_address: req.body.mac_address,
+    $timestamp_connected: Math.floor(Date.now() / 1000),
+    $is_blocked: 0,
+    $snooze_period: 0
+  }, function() {
+    res.sendStatus(200);
+  });
 });
 
 // SOCKET.IO
@@ -57,104 +73,216 @@ io.on('connection', function (socket) {
 });
 
 function update() {
-  dhcp_devices = [];
-  connected_devices = [];
-  matched_connected_devices = [];
+  async.series([
+    function(callback) {
+      // Reset runtime variables
+      listFileHostnames = [];
+      listConnectedDevices = [];
+      listConnectedDevicesWithInfo = [];
+      listKnownHostnames = [];
+      listKnownDeviceInfo = [];
 
-  child.execFile('cat', ['/var/lib/dhcp/dhcpd.leases'], function(err, stdout, stderr) {
-    let leaseFile = stdout;
+      callback();
+    },
+    function(callback) {
+      // 1: Update database of hostnames
 
-    leaseFile = leaseFile.split("lease");
+      child.execFile('cat', ['/var/lib/dhcp/dhcpd.leases'], function(err, stdout, stderr) {
+        let leaseFile = stdout;
 
-    // Remove extraneous lines (first three)
-    for (let i = 0; i < 3; i++) {
-      leaseFile.shift();
-    }
+        // Split leases file into individual leases
+        leaseFile = leaseFile.split("lease");
 
-    for (let lease in leaseFile) {
-      let mac_address;
-      let hostname;
-
-      lease = leaseFile[lease].split('\n');
-
-      for (let line in lease) {
-        if (lease[line].includes(" hardware ethernet ")) {
-          mac_address = lease[line].replace("  hardware ethernet ", "").replace(';', '');
+        // Remove extraneous lines (first three)
+        for (let i = 0; i < 3; i++) {
+          leaseFile.shift();
         }
 
-        if (lease[line].includes(" client-hostname ")) {
-          hostname = lease[line].replace("  client-hostname ", "").replace(';', '').replace(/"/g, '');
+        // Iterate through each lease
+        for (let lease in leaseFile) {
+          let mac_address;
+          let hostname;
+
+          // Split lease block into lines
+          lease = leaseFile[lease].split('\n');
+
+          // Iterate through each lease
+          for (let line in lease) {
+            // Find MAC address
+            if (lease[line].includes(" hardware ethernet ")) {
+              mac_address = lease[line].replace("  hardware ethernet ", "").replace(';', '');
+            }
+
+            // Find hostname
+            if (lease[line].includes(" client-hostname ")) {
+              hostname = lease[line].replace("  client-hostname ", "").replace(';', '').replace(/"/g, '');
+            }
+          }
+
+          listFileHostnames.push({
+            "mac_address": mac_address,
+            "hostname": hostname
+          });
         }
-      }
 
-      if (typeof hostname != "undefined") {
-        dhcp_devices.push({
-          "mac_address": mac_address,
-          "hostname": hostname
-        });
-      }
-    }
+        // Iterate through parsed leases list
+        for (let lease in listFileHostnames) {
+          lease = listFileHostnames[lease];
 
-    child.execFile('iw', ['dev', 'wlan0', 'station', 'dump'], function(err, stdout, stderr) {
-      let connectedStations = stdout;
+          // Filter out undefined hostnames
+          if (lease['hostname']) {
+            // Create a canonical source of hostnames
+            let mac_address = lease['mac_address'];
+            let hostname = lease['hostname'];
 
-      fs.readFile('blacklist.txt', 'utf8', function(err, blacklist_data) {
-        let blacklistedDevices = blacklist_data.split(';');
+            db.run("INSERT OR IGNORE INTO hostnames (mac_address, hostname) VALUES ('" + mac_address + "', '" + hostname + "')", function() {
+              db.run("UPDATE hostnames SET hostname = '" + hostname + "' WHERE mac_address = '" + mac_address + "'");
+            });
+          }
+        }
+      });
 
+      callback();
+    },
+    function(callback) {
+      // 2: Get currently connected devices
+
+      child.execFile('iw', ['dev', 'wlan0', 'station', 'dump'], function(err, stdout, stderr) {
+        let connectedStations = stdout;
+
+        // Parse through connected stations block
         connectedStations = connectedStations.split("Station");
-
         connectedStations.shift();
 
         for (let station in connectedStations) {
           station = connectedStations[station].split('\n')[0];
           station = station.split(' ')[1].replace(' ', '');
-          connected_devices.push(station);
+          listConnectedDevices.push(station);
         }
 
-        for (let device in connected_devices) {
-          let mac_address = connected_devices[device];
-          let hostname;
-
-          for (let dhcp_device in dhcp_devices) {
-            if (dhcp_devices[dhcp_device]["mac_address"] === mac_address) {
-              hostname = dhcp_devices[dhcp_device]["hostname"];
-            }
-          }
-
-          if (blacklistedDevices.indexOf(mac_address) === -1) {
-            matched_connected_devices.push({
-              "mac_address": mac_address,
-              "hostname": hostname
-            });
-          }
-        }
-
-        fs.readFile('known.txt', 'utf8', function(err, data) {
-          // Split known mac address into array
-          let knownMacAddresses = data.split(';')
-
-          for (let device in matched_connected_devices) {
-            let newDevice = matched_connected_devices[device]['mac_address'];
-            let match = false;
-
-            for (let address in knownMacAddresses) {
-              let knownDevice = knownMacAddresses[address];
-
-              if (newDevice === knownDevice) {
-                match = true;
-              }
-            }
-
-            if (!match) {
-              io.sockets.emit('new_device', matched_connected_devices[device]);
-            }
-          }
-        });
-
-        io.sockets.emit('update_response', matched_connected_devices);
+        callback();
       });
+    },
+    function(callback) {
+      // 3: Check if each connected device is known to the router
+
+      // Retreive all unblocked devices
+      db.all("SELECT * FROM devices WHERE is_blocked='0'", function(err, rows) {
+        if (rows.length > 0) {
+          for (let row in rows) {
+            let knownMacAddress = rows[row]['mac_address'];
+            createNewDeviceNotifications();
+          }
+        } else {
+          createNewDeviceNotifications();
+        }
+      });
+
+      callback();
+    },
+    function(callback) {
+      db.all("SELECT * FROM hostnames", function(err, rows) {
+
+        for (let row in rows) {
+          row = rows[row];
+          listKnownHostnames.push(row);
+        }
+
+        callback();
+      });
+    },
+    function(callback) {
+      db.all("SELECT * FROM devices", function(err, rows) {
+
+        for (let row in rows) {
+          row = rows[row];
+          listKnownDeviceInfo.push(row);
+        }
+
+        callback();
+      });
+    },
+    function(callback) {
+      // Send list of connected devices to UI
+
+      for (let device in listConnectedDevices) {
+        let mac_address = listConnectedDevices[device];
+        let hostname = "[UNKNOWN]";
+        let timestamp_connected = null;
+        let type = null;
+        let is_blocked = null;
+        let snooze_period = null;
+
+        // Find hostname
+        for (let item in listKnownHostnames) {
+          item = listKnownHostnames[item];
+
+          if (item['mac_address'] === mac_address) {
+            hostname = item['hostname'];
+          }
+        }
+
+        // Find other information
+        for (let item in listKnownDeviceInfo) {
+          item = listKnownDeviceInfo[item];
+
+          if (item['mac_address'] === mac_address) {
+            timestamp_connected = item['timestamp_connected'];
+            type = item['type'];
+            is_blocked = item['is_blocked'];
+            snooze_period = item['snooze_period'];
+          }
+        }
+
+        listConnectedDevicesWithInfo.push({
+          'mac_address': mac_address,
+          'hostname': hostname,
+          'timestamp_connected': timestamp_connected,
+          'type': type,
+          'is_blocked': is_blocked,
+          'snooze_period': snooze_period
+        });
+      }
+
+      callback();
+    },
+    function() {
+      console.log(listConnectedDevicesWithInfo);
+      io.sockets.emit('update_response', listConnectedDevicesWithInfo);
+    }
+  ]);
+}
+
+function createNewDeviceNotifications() {
+  // Iterate through each connected device
+  for (let device in listConnectedDevices) {
+    let thisDevice = listConnectedDevices[device];
+
+    // Check if this device is known
+    db.all("SELECT COUNT(*) FROM devices WHERE mac_address='" + thisDevice + "'", function(err, rows) {
+      let result = rows[0]['COUNT(*)'];
+
+      // If result is 0, then this is a new device
+      if (parseInt(result) === 0) {
+        db.all("SELECT * FROM hostnames WHERE mac_address='" + thisDevice + "'", function(err, rows) {
+          let hostname = "";
+
+          // Retrieve a hostname if possible
+          if (rows.length > 0) {
+            hostname = rows[0]['hostname'];
+          } else {
+            hostname = "[unknown]";
+          }
+
+          // Send notifications to the router UI
+          io.sockets.emit('new_device', {
+            "mac_address": thisDevice,
+            "hostname": hostname
+          });
+        });
+      }
     });
-  });
+  }
 }
 
 function removeClient(mac_address) {
@@ -163,7 +291,6 @@ function removeClient(mac_address) {
   fs.appendFile('/etc/dhcp/dhcpd.conf', 'host block-me { hardware ethernet ' + mac_address + '; deny booting; }\n', function() {
     child.execFile('service', ['isc-dhcp-server', 'restart'], function(err, stdout, stderr) {
       child.execFile('hostapd_cli', ['deauthenticate', mac_address], function(err, stdout, stderr) {
-        fs.appendFile('blacklist.txt', ';' + mac_address);
       });
     });
   });

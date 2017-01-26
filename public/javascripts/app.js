@@ -32,7 +32,7 @@ $(window).load(function() {
 
   // Receive new device information and display it
   socket.on('update_response', function(data) {
-    updateNetworks(data);
+    updateDevices(data);
     lastUpdatedSecs = 0;
   });
 
@@ -80,13 +80,16 @@ $(window).load(function() {
   });
 
   // FUNCTIONS
-  function updateNetworks(data) {
+  function updateDevices(data) {
     $('#device_list ul').empty();
     $('#refresh_button').text("Refreshing...");
 
-    for (let network in data) {
-      let hostname = data[network]["hostname"];
-      $('#device_list ul').append("<li>" + hostname + "</li>")
+    for (let device in data) {
+      device = data[device];
+
+      if (device.is_blocked === 0) {
+        $('#device_list ul').append("<li>" + device.hostname + "</li>")
+      }
     }
 
     $('#refresh_button').text("Refresh");

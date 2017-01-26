@@ -40,5 +40,4 @@ jspm_packages
 .AppleDouble
 
 public/stylesheets/app.css
-blacklist.txt
-known.txt
+router.db

@@ -94,17 +94,11 @@ h2 {
     margin-bottom: 0.6em; }
     #device_list ul li:last-child {
       margin-bottom: 0; }
-  #device_list #refresh_button {
-    background-color: #808080;
-    color: #FFF;
-    width: 200px;
-    height: 50px;
-    line-height: 50px;
-    display: block;
-    text-decoration: none;
+  #device_list #last_updated {
+    color: #999;
     position: absolute;
     bottom: 2em;
-    left: calc((100% / 2) - 100px); }
+    width: calc(100% - 4em); }
 
 .notification {
   position: absolute;
@@ -120,17 +114,20 @@ h2 {
   .notification div {
     overflow: auto; }
   .notification .icon {
-    width: 200px;
+    width: calc(33.333% - 1em);
     float: left;
-    margin-right: 1em; }
+    margin-right: 1em;
+    text-align: right; }
+    .notification .icon img {
+      height: 9em; }
   .notification .details {
-    width: 500px;
+    width: 66.666%;
     float: left; }
     .notification .details h2 {
       font-size: 1.2em;
       line-height: 1.2em;
       font-weight: 700;
-      margin-bottom: 2em; }
+      margin-bottom: 4em; }
     .notification .details p {
       line-height: 1.2em;
       margin-bottom: 2em; }
@@ -147,4 +144,7 @@ h2 {
         text-decoration: none;
         float: left;
         margin-right: 0.5em;
-        text-align: center; }
+        text-align: center;
+        border-radius: 6px; }
+      .notification .details p .ignore_device {
+        margin-right: 2em; }
