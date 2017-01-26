@@ -9,10 +9,9 @@ html(lang="en")
     link(rel="stylesheet" type="text/css" href="/public/stylesheets/app.css")
   body
     div(id="container")
-      div(id="device_list")
-        h1 Devices connected to your router
-        ul
-        p(id="last_updated") Last updated #[span(id="last_updated_num") 0 seconds] ago
+      div(id="connected_devices")
+        div(id="list")
+        //p(id="last_updated") Last updated #[span(id="last_updated_num") 0 seconds] ago
     div(id="notifications")
     div(id="notification_template" class="notification" style="display:none;" data-type="unknown")
       div(class="main")

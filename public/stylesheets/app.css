@@ -82,19 +82,37 @@ h2 {
   border-radius: 4px;
   overflow: hidden; }
 
-#device_list {
+#connected_devices {
   width: calc(100% - 4em);
   height: calc(100% - 4em);
   padding: 2em;
-  text-align: center;
   position: relative; }
-  #device_list h1 {
-    margin-bottom: 1em; }
-  #device_list ul li {
-    margin-bottom: 0.6em; }
-    #device_list ul li:last-child {
-      margin-bottom: 0; }
-  #device_list #last_updated {
+  #connected_devices #list {
+    width: 100%;
+    height: 100%; }
+    #connected_devices #list .device {
+      width: 120px;
+      height: 120px;
+      float: left;
+      background-repeat: no-repeat;
+      background-size: 50% 50%;
+      background-position: center 30%;
+      text-align: center;
+      line-height: 200px;
+      font-size: 16px; }
+      #connected_devices #list .device.unknown {
+        background-image: url("/public/images/symbol-unknown.svg"); }
+      #connected_devices #list .device.laptop {
+        background-image: url("/public/images/symbol-laptop.svg"); }
+      #connected_devices #list .device.desktop {
+        background-image: url("/public/images/symbol-desktop.svg"); }
+      #connected_devices #list .device.tablet {
+        background-image: url("/public/images/symbol-tablet.svg"); }
+      #connected_devices #list .device.phone {
+        background-image: url("/public/images/symbol-phone.svg"); }
+      #connected_devices #list .device.tv {
+        background-image: url("/public/images/symbol-tv.svg"); }
+  #connected_devices #last_updated {
     color: #999;
     position: absolute;
     bottom: 2em;
