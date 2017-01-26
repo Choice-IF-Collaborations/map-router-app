@@ -15,7 +15,7 @@ html(lang="en")
         p(id="last_updated") Last updated #[span(id="last_updated_num") 0 seconds] ago
     div(id="notifications")
     div(id="notification_template" class="notification" style="display:none;")
-      div
+      div(class="main")
         div(class="icon")
           img(src="/public/images/notification_icon.png")
         div(class="details")
@@ -24,3 +24,20 @@ html(lang="en")
           p
             a(href="#" class="ignore_device") Ignore
             a(href="#" class="remove_device") Block
+          p
+            a(href="#" class="choose_icon") Choose icon
+      div(class="choose_icon_view" style="background: red; position: absolute; top: 0; left: 0; width:100%; height: 100%;")
+        p Choose an icon
+        
+        div(class="icons")
+          a(href="#" data-type="laptop") Laptop
+          
+          a(href="#" data-type="desktop") Desktop
+
+          a(href="#" data-type="tablet") Tablet
+          
+          a(href="#" data-type="phone") Phone
+
+          a(href="#" data-type="tv") TV
+        
+        a(href="#" class="close_icon_view") Confirm

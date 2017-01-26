@@ -79,6 +79,15 @@ $(window).load(function() {
     });
   });
 
+  $('body').on('click', '.choose_icon', function(e) {
+    e.preventDefault();
+
+    let $parent = $(this).parent().parent().parent().parent();
+
+    $parent.find('.choose_icon_view').fadeIn(250);
+
+  });
+
   // FUNCTIONS
   function updateDevices(data) {
     $('#device_list ul').empty();
