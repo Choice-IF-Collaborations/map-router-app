@@ -52,7 +52,10 @@ $(window).load(function() {
     $.ajax({
       type: "POST",
       url: "/remove",
-      data: { mac_address: $(this).attr('data-mac-address') },
+      data: {
+        mac_address: $(this).attr('data-mac-address'),
+        type: $parent.attr('data-type')
+      },
       success: function() {
         $parent.fadeOut(250, function() {
           $parent.remove();
@@ -70,7 +73,10 @@ $(window).load(function() {
     $.ajax({
       type: "POST",
       url: "/ignore",
-      data: { mac_address: $(this).attr('data-mac-address') },
+      data: {
+        mac_address: $(this).attr('data-mac-address'),
+        type: $parent.attr('data-type')
+      },
       success: function() {
         $parent.fadeOut(250, function() {
           $parent.remove();

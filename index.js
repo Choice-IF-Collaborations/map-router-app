@@ -42,7 +42,7 @@ app.post('/remove', function(req, res) {
   removeClient(mac_address);
 
   db.run("INSERT INTO devices(type, mac_address, timestamp_connected, is_blocked, snooze_period) VALUES($type, $mac_address, $timestamp_connected, $is_blocked, $snooze_period)", {
-    $type: "unknown",
+    $type: req.body.type,
     $mac_address: mac_address,
     $timestamp_connected: Math.floor(Date.now() / 1000),
     $is_blocked: 1,
@@ -54,7 +54,7 @@ app.post('/remove', function(req, res) {
 
 app.post('/ignore', function(req, res) {
   db.run("INSERT INTO devices(type, mac_address, timestamp_connected, is_blocked, snooze_period) VALUES($type, $mac_address, $timestamp_connected, $is_blocked, $snooze_period)", {
-    $type: "unknown",
+    $type: req.body.type,
     $mac_address: req.body.mac_address,
     $timestamp_connected: Math.floor(Date.now() / 1000),
     $is_blocked: 0,
