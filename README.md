@@ -169,6 +169,7 @@ It also:
 * The app is started by running `sudo node index.js` inside the repository. It must be run as `sudo` allow device blocking to work.
 * The interface can be accessed in Chromium at `http://localhost:3000`.
 * The database files can be reset by running `rm -rf blacklist.txt known.txt && touch blacklist.txt known.txt`.
+* This file changes `/etc/dhcp/dhcpd.conf` to block devices.
 
 ## References
 
