@@ -123,14 +123,14 @@ $(window).load(function() {
 
   // FUNCTIONS
   function updateDevices(data) {
-    $('#device_list ul').empty();
+    $('#connected_devices # list').empty();
     $('#refresh_button').text("Refreshing...");
 
     for (let device in data) {
       device = data[device];
 
       if (device.is_blocked === 0) {
-        $('#device_list ul').append("<li>" + device.hostname + "</li>")
+        $('#connected_devices #list').append('<div class="device ' + device.type + '">' + device.hostname + "</div>")
       }
     }
 
