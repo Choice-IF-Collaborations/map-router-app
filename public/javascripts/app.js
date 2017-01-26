@@ -88,6 +88,33 @@ $(window).load(function() {
 
   });
 
+  $('body').on('click', '.choose_icon_view .icons a', function(e) {
+    e.preventDefault();
+
+    let type = $(this).text().toLowerCase();
+    let $notification = $(this).parent().parent().parent();
+
+    // Update UI
+    $(this).parent().find('a').removeClass('selected');
+    $(this).addClass('selected');
+
+    // Append device type to notification
+    $notification.attr('data-type', type)
+  });
+
+  $('body').on('click', '.choose_icon_view .close_icon_view', function(e) {
+    e.preventDefault();
+
+    $notification = $(this).parent().parent();
+    let type = $notification.attr('data-type');
+
+    if (type !== "unknown") {
+      $notification.find('.choose_icon_view').fadeOut(250);
+    } else {
+      return
+    }
+  });
+
   // FUNCTIONS
   function updateDevices(data) {
     $('#device_list ul').empty();

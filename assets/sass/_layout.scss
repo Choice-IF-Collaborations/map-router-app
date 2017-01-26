@@ -134,4 +134,56 @@ h2 {
       }
     }
   }
+
+  .choose_icon_view {
+    background: #FFF;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+
+    .icons {
+      overflow: auto;
+
+      a {
+        background: blue;
+        display: block;
+        margin-right: 5px;
+        float: left;
+        width: 120px;
+        height: 120px;
+        border: rgba(0, 0, 0, 0) 5px solid;
+        background-position: center center;
+        background-size: 90% 90%;
+        background-repeat: no-repeat;
+        text-indent: -9999px;
+
+        &.selected {
+          border: rgba(0, 0, 0, 255) 5px solid;
+        }
+
+        &.laptop {
+          background-image: url('/public/images/symbol-laptop.svg');
+        }
+
+        &.desktop {
+          background-image: url('/public/images/symbol-desktop.svg');
+        }
+
+        &.tablet {
+          background-image: url('/public/images/symbol-tablet.svg');
+        }
+
+        &.phone {
+          background-image: url('/public/images/symbol-phone.svg');
+        }
+
+        &.tv {
+          background-image: url('/public/images/symbol-tv.svg');
+        }
+      }
+    }
+  }
 }
