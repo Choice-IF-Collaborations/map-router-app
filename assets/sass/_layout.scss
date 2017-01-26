@@ -59,17 +59,11 @@ h2 {
     }
   }
 
-  #refresh_button {
-    background-color: #808080;
-    color: #FFF;
-    width: 200px;
-    height: 50px;
-    line-height: 50px;
-    display: block;
-    text-decoration: none;
+  #last_updated {
+    color: #999;
     position: absolute;
     bottom: 2em;
-    left: calc((100% / 2) - 100px);
+    width: calc(100% - 4em);
   }
 }
 
@@ -91,20 +85,25 @@ h2 {
   }
 
   .icon {
-    width: 200px;
+    width: calc(33.333% - 1em);
     float: left;
     margin-right: 1em;
+    text-align: right;
+
+    img {
+      height: 9em;
+    }
   }
 
   .details {
-    width: 500px;
+    width: 66.666%;
     float: left;
 
     h2 {
       font-size: 1.2em;
       line-height: 1.2em;
       font-weight: 700;
-      margin-bottom: 2em;
+      margin-bottom: 4em;
     }
 
     p {
@@ -127,6 +126,11 @@ h2 {
         float: left;
         margin-right: 0.5em;
         text-align: center;
+        border-radius:6px
+      }
+
+      .ignore_device {
+        margin-right:2em;
       }
     }
   }

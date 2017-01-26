@@ -3,10 +3,21 @@ $(window).load(function() {
   var socket = io();
   let notificationCounter = 0;
   let notifications = [];
+  let lastUpdatedSecs = 0;
 
   // START
   // Fetch information when page first loaded
   socket.emit('update_call', null);
+
+  setInterval(function() {
+    lastUpdatedSecs++;
+
+    if (lastUpdatedSecs === 1) {
+      $('#last_updated_num').text(lastUpdatedSecs + " second");
+    } else {
+      $('#last_updated_num').text(lastUpdatedSecs + " seconds");
+    }
+  }, 1000);
 
   // Poll for new information
   setInterval(function() {
@@ -22,6 +33,7 @@ $(window).load(function() {
   // Receive new device information and display it
   socket.on('update_response', function(data) {
     updateNetworks(data);
+    lastUpdatedSecs = 0;
   });
 
   // EVENTS
@@ -83,7 +95,7 @@ $(window).load(function() {
   function createNotification(data) {
     if (notifications.indexOf(data.mac_address) == -1) {
       notifications.push(data.mac_address);
-      
+
       notificationCounter++;
 
       let $notificationTemplate = $('#notification_template').clone();

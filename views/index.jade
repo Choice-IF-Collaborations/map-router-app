@@ -12,13 +12,14 @@ html(lang="en")
       div(id="device_list")
         h1 Devices connected to your router
         ul
-        a(id="refresh_button" href="#") Refresh
+        p(id="last_updated") Last updated #[span(id="last_updated_num") 0 seconds] ago
     div(id="notifications")
     div(id="notification_template" class="notification" style="display:none;")
       div
-        img(src="/public/images/notification_icon.png" class="icon")
+        div(class="icon")
+          img(src="/public/images/notification_icon.png")
         div(class="details")
-          h2 #[span(class="device_name") –] has just connected to your router.
+          h2 #[span(class="device_name") –] has just connected to your router
           p If you don't recognise this device, you can remove it from your network.
           p
             a(href="#" class="remove_device") Remove
