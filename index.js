@@ -92,7 +92,6 @@ app.post('/unremove', function(req, res) {
     child.exec('sed -i".bak" \'/' + mac_address + '/d\' /etc/dhcp/dhcpd.conf', function(err, stdout, stderr) {
       // Restart DHCP server
       child.execFile('service', ['isc-dhcp-server', 'restart'], function(err, stdout, stderr) {
-        console.log('unblocked ' + mac_address);
         res.sendStatus(200);
       });
     });
@@ -355,7 +354,6 @@ function removeClient(mac_address) {
   fs.appendFile('/etc/dhcp/dhcpd.conf', 'host block-me { hardware ethernet ' + mac_address + '; deny booting; }\n', function() {
     child.execFile('service', ['isc-dhcp-server', 'restart'], function(err, stdout, stderr) {
       child.execFile('hostapd_cli', ['deauthenticate', mac_address], function(err, stdout, stderr) {
-        console.log("mac address removed: " + mac_address);
       });
     });
   });
@@ -363,8 +361,6 @@ function removeClient(mac_address) {
 
 // SNOOZE
 setInterval(function() {
-  console.log("propogating timeouts");
-
   db.all("SELECT * FROM devices WHERE snooze_period > 0", function(err, rows) {
     for (let row in rows) {
       let device = rows[row];
@@ -372,14 +368,11 @@ setInterval(function() {
 
       if (now > device['timestamp_snooze']) {
         db.run('UPDATE devices SET is_blocked="1", snooze_period="0" WHERE mac_address="' + device['mac_address'] + '"', function() {
-          console.log("timeout finished, database updated");
           removeClient(device['mac_address']);
         });
       }
     }
   });
-
-  console.log("------");
 }, 5000);
 
 // SERVER

@@ -153,9 +153,6 @@ $(window).load(function() {
     let mac_address = $parent.attr('data-mac-address');
     let snooze_period = $(this).attr('data-snooze-period');
 
-    console.log(mac_address);
-    console.log(snooze_period);
-
     $.ajax({
       type: "POST",
       url: "/snooze",
@@ -203,9 +200,8 @@ $(window).load(function() {
   $('body').on('click', '#blocked_devices_list .device a', function(e) {
     e.preventDefault();
 
+    let device_icon = $(this).parent();
     let mac_address = $(this).parent().attr('data-mac-address');
-
-    console.log("blocked device : " + mac_address);
 
     $.ajax({
       type: "POST",
@@ -214,7 +210,7 @@ $(window).load(function() {
         mac_address: mac_address
       },
       success: function() {
-        console.log("done");
+        device_icon.remove();
       }
     });
   });
