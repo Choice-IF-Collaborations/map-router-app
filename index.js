@@ -20,6 +20,7 @@ let listConnectedDevicesWithInfo = [];
 let listAllowedDevices = [];
 let listKnownHostnames = [];
 let listKnownDeviceInfo = [];
+let listBlockedDevices = [];
 
 // CONFIG
 app.set('port', process.env.PORT || 3000);
@@ -64,6 +65,21 @@ app.post('/ignore', function(req, res) {
   });
 });
 
+app.post('/unremove', function(req, res) {
+  let mac_address = req.body.mac_address;
+
+  // Unblock device in database
+  db.run("UPDATE devices SET is_blocked = 0 WHERE mac_address = '" + mac_address + "'", function() {
+    // Remove blocking line from dhcp configuration
+    child.exec('sed -i".bak" \'/' + mac_address + '/d\' /etc/dhcp/dhcpd.conf', function(err, stdout, stderr) {
+      // Restart DHCP server
+      child.execFile('service', ['isc-dhcp-server', 'restart'], function(err, stdout, stderr) {
+        console.log('unblocked ' + mac_address);
+      });
+    });
+  });
+});
+
 // SOCKET.IO
 // When the UI asked for an update, respond
 io.on('connection', function (socket) {
@@ -81,6 +97,7 @@ function update() {
       listConnectedDevicesWithInfo = [];
       listKnownHostnames = [];
       listKnownDeviceInfo = [];
+      listBlockedDevices = [];
 
       callback();
     },
@@ -246,9 +263,37 @@ function update() {
 
       callback();
     },
+    function(callback) {
+      // Get list of blocked devices
+      db.all("SELECT * FROM devices WHERE is_blocked='1'", function(err, rows) {
+        for (let row in rows) {
+          row = rows[row];
+          let hostname = "[UNKNOWN]";
+          let type = row['type'];
+          let mac_address = row['mac_address'];
+
+          // Find hostname
+          for (let item in listKnownHostnames) {
+            item = listKnownHostnames[item];
+
+            if (item['mac_address'] === mac_address) {
+              hostname = item['hostname'];
+            }
+          }
+
+          listBlockedDevices.push({
+            'hostname': hostname,
+            'type': type,
+            'mac_address': mac_address
+          });
+        }
+
+        callback();
+      });
+    },
     function() {
-      console.log(listConnectedDevicesWithInfo);
-      io.sockets.emit('update_response', listConnectedDevicesWithInfo);
+      io.sockets.emit('update_connected', listConnectedDevicesWithInfo);
+      io.sockets.emit('update_blocked', listBlockedDevices);
     }
   ]);
 }

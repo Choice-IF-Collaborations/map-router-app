@@ -31,9 +31,13 @@ $(window).load(function() {
   });
 
   // Receive new device information and display it
-  socket.on('update_response', function(data) {
-    updateDevices(data);
+  socket.on('update_connected', function(data) {
+    updateConnectedDevices(data);
     lastUpdatedSecs = 0;
+  });
+
+  socket.on('update_blocked', function(data) {
+    updateBlockedDevices(data);
   });
 
   // EVENTS
@@ -143,7 +147,7 @@ $(window).load(function() {
   });
 
   // FUNCTIONS
-  function updateDevices(data) {
+  function updateConnectedDevices(data) {
     $('#refresh_button').text("Refreshing...");
 
     // Update list of connected devices
@@ -153,14 +157,41 @@ $(window).load(function() {
       device = data[device];
 
       if (device.is_blocked === 0) {
-        $('#connected_devices_list').append('<div class="device ' + device.type + '">' + device.hostname + "</div>")
+        $('#connected_devices_list').append('<div class="device ' + device.type + '">' + device.hostname + "</div>");
       }
     }
 
-    // Update list of blocked devices
-
     $('#refresh_button').text("Refresh");
   }
+
+  function updateBlockedDevices(data) {
+    $('#blocked_devices_list').empty();
+
+    for (let device in data) {
+      device = data[device];
+
+      $('#blocked_devices_list').append('<div class="device ' + device.type + '" data-mac-address="' + device.mac_address + '"><a href="#">' + device.hostname + "</a></div>");
+    }
+  }
+
+  $('body').on('click', '#blocked_devices_list .device a', function(e) {
+    e.preventDefault();
+
+    let mac_address = $(this).parent().attr('data-mac-address');
+
+    console.log("blocked device : " + mac_address);
+
+    $.ajax({
+      type: "POST",
+      url: "/unremove",
+      data: {
+        mac_address: mac_address
+      },
+      success: function() {
+        console.log("done");
+      }
+    });
+  });
 
   function createNotification(data) {
     if (notifications.indexOf(data.mac_address) == -1) {
