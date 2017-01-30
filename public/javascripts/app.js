@@ -144,16 +144,20 @@ $(window).load(function() {
 
   // FUNCTIONS
   function updateDevices(data) {
-    $('#connected_devices #list').empty();
     $('#refresh_button').text("Refreshing...");
+
+    // Update list of connected devices
+    $('#connected_devices_list').empty();
 
     for (let device in data) {
       device = data[device];
 
       if (device.is_blocked === 0) {
-        $('#connected_devices #list').append('<div class="device ' + device.type + '">' + device.hostname + "</div>")
+        $('#connected_devices_list').append('<div class="device ' + device.type + '">' + device.hostname + "</div>")
       }
     }
+
+    // Update list of blocked devices
 
     $('#refresh_button').text("Refresh");
   }
