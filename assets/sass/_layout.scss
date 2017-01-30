@@ -67,6 +67,15 @@ h2 {
   display: none;
 }
 
+#router_information {
+  text-align: center;
+
+  p {
+    font-size: 1.5em;
+    margin-bottom: 0.3em;
+  }
+}
+
 .view {
   width: calc(100% - 4em);
   height: calc(100% - 4em);

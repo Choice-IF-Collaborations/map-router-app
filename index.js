@@ -21,6 +21,23 @@ let listAllowedDevices = [];
 let listKnownHostnames = [];
 let listKnownDeviceInfo = [];
 let listBlockedDevices = [];
+let infoRouter = "";
+let infoPassword = "";
+
+// Get router information
+child.execFile('cat', ['/etc/hostapd/hostapd.conf'], function(err, stdout, stderr) {
+  let hostapd = stdout.split('\n');
+
+  for (let line in hostapd) {
+    line = hostapd[line].split('=');
+
+    if (line[0] === "ssid") {
+      infoRouter = line[1];
+    } else if (line[0] === "wpa_passphrase") {
+      infoPassword = line[1];
+    }
+  }
+});
 
 // CONFIG
 app.set('port', process.env.PORT || 3000);
@@ -34,7 +51,7 @@ app.use(bodyParser.urlencoded({
 // ROUTES
 // Render the app view
 app.get('/', function(req, res) {
-  res.render('index');
+  res.render('index', { infoRouter, infoPassword });
 });
 
 app.post('/remove', function(req, res) {

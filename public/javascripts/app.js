@@ -58,7 +58,12 @@ $(window).load(function() {
       $('#connected_devices').show();
       $('#connected_devices_link').addClass('active');
     } else if (target === "router_info_link") {
-      $('#router_information').show();
+      $('#router_information').css({
+        'justify-content': 'center',
+        'align-items': 'center',
+        'display': 'flex'
+      });
+
       $('#router_info_link').addClass('active');
     }
   });

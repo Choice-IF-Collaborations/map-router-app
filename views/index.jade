@@ -15,7 +15,9 @@ html(lang="en")
       div(id="blocked_devices" class="view")
         div(id="blocked_devices_list" class="list")
       div(id="router_information" class="view")
-        p router information
+        div
+          p Network name: #{infoRouter}
+          p Password: #{infoPassword}
       div(id="nav")
         a(id="blocked_devices_link" href="#") Blocked Devices
         a(id="connected_devices_link" href="#" class="active") Connected Devices
