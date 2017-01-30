@@ -82,15 +82,39 @@ h2 {
   border-radius: 4px;
   overflow: hidden; }
 
-#connected_devices {
+#nav {
+  background: #FFF;
+  position: relative;
+  bottom: 4em;
+  left: 2em;
+  height: 2em;
+  width: 720px; }
+  #nav a {
+    display: block;
+    width: 33.33%;
+    height: 100%;
+    float: left;
+    line-height: 2em;
+    text-align: center;
+    text-decoration: none;
+    color: #000; }
+    #nav a.active {
+      border-bottom: #000 2px solid; }
+
+#blocked_devices,
+#router_information {
+  display: none; }
+
+.view {
   width: calc(100% - 4em);
   height: calc(100% - 4em);
   padding: 2em;
   position: relative; }
-  #connected_devices #list {
+  .view .list {
     width: 100%;
-    height: 100%; }
-    #connected_devices #list .device {
+    height: 100%;
+    background: red; }
+    .view .list .device {
       width: 120px;
       height: 120px;
       float: left;
@@ -100,19 +124,26 @@ h2 {
       text-align: center;
       line-height: 200px;
       font-size: 16px; }
-      #connected_devices #list .device.unknown {
+      .view .list .device a {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: 100%;
+        text-decoration: none;
+        color: #000; }
+      .view .list .device.unknown {
         background-image: url("/public/images/symbol-unknown.svg"); }
-      #connected_devices #list .device.laptop {
+      .view .list .device.laptop {
         background-image: url("/public/images/symbol-laptop.svg"); }
-      #connected_devices #list .device.desktop {
+      .view .list .device.desktop {
         background-image: url("/public/images/symbol-desktop.svg"); }
-      #connected_devices #list .device.tablet {
+      .view .list .device.tablet {
         background-image: url("/public/images/symbol-tablet.svg"); }
-      #connected_devices #list .device.phone {
+      .view .list .device.phone {
         background-image: url("/public/images/symbol-phone.svg"); }
-      #connected_devices #list .device.tv {
+      .view .list .device.tv {
         background-image: url("/public/images/symbol-tv.svg"); }
-  #connected_devices #last_updated {
+  .view #last_updated {
     color: #999;
     position: absolute;
     bottom: 2em;

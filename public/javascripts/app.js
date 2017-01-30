@@ -38,6 +38,27 @@ $(window).load(function() {
 
   // EVENTS
   // Refresh button
+  $('#nav a').click(function(e) {
+    e.preventDefault();
+
+    let target = $(this).attr('id');
+
+    $(this).parent().children().removeClass('active');
+
+    $('.view').hide();
+
+    if (target === "blocked_devices_link") {
+      $('#blocked_devices').show();
+      $('#blocked_devices_link').addClass('active');
+    } else if (target === "connected_devices_link") {
+      $('#connected_devices').show();
+      $('#connected_devices_link').addClass('active');
+    } else if (target === "router_info_link") {
+      $('#router_information').show();
+      $('#router_info_link').addClass('active');
+    }
+  });
+
   $('#refresh_button').click(function(e) {
     e.preventDefault();
     socket.emit('update_call', null);
@@ -123,7 +144,7 @@ $(window).load(function() {
 
   // FUNCTIONS
   function updateDevices(data) {
-    $('#connected_devices # list').empty();
+    $('#connected_devices #list').empty();
     $('#refresh_button').text("Refreshing...");
 
     for (let device in data) {

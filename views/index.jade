@@ -9,10 +9,22 @@ html(lang="en")
     link(rel="stylesheet" type="text/css" href="/public/stylesheets/app.css")
   body
     div(id="container")
-      div(id="connected_devices")
-        div(id="list")
+      div(id="connected_devices" class="view")
+        div(id="connected_devices_list" class="list")
+          div(class="device tv")
+            a(href="#") the telly
+          div(class="device tv")
+            a(href="#") the telly
         //p(id="last_updated") Last updated #[span(id="last_updated_num") 0 seconds] ago
-    div(id="notifications")
+      div(id="blocked_devices" class="view")
+        p blocked Devices
+      div(id="router_information" class="view")
+        p router information
+      div(id="nav")
+        a(id="blocked_devices_link" href="#") Blocked Devices
+        a(id="connected_devices_link" href="#" class="active") Connected Devices
+        a(id="router_info_link" href="#") Router Info
+      div(id="notifications")
     div(id="notification_template" class="notification" style="display:none;" data-type="unknown")
       div(class="main")
         div(class="icon")
