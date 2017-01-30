@@ -33,18 +33,21 @@ html(lang="en")
             a(href="#" class="remove_device") Block
           p
             a(href="#" class="choose_icon") Choose icon
+          p(class="snooze_choices")
+            span Snooze
+            a(href="#" data-snooze-period="900") 15 minutes
+            a(href="#" data-snooze-period="3600") 1 hour
+            a(href="#" data-snooze-period="14400") 4 hours
+            a(href="#" data-snooze-period="28800") 8 hours
+            a(href="#" data-snooze-period="86400") 24 hours
       div(class="choose_icon_view")
         p Choose an icon
         
         div(class="icons")
           a(href="#" class="laptop") Laptop
-          
           a(href="#" class="desktop") Desktop
-
           a(href="#" class="tablet") Tablet
-          
           a(href="#" class="phone") Phone
-
           a(href="#" class="tv") TV
         
         a(href="#" class="close_icon_view") Confirm
