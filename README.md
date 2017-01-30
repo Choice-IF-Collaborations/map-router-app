@@ -1,14 +1,15 @@
 # CHOICE Map Router
 
 ## What is this?
-This is a Node.js app that shows what devices are connected to a Rasberry Pi-based router by their hostname.
+This is a Node.js app that shows what devices are connected to a Raspberry Pi-based router by their hostname.
 
 It also:
 
 * Creates a new Wi-Fi access point and can bridge an Internet connection from an existing router or modem.
 * Shows a notification when a device that hasn't been seen before connects to the router.
-* Gives people the option to block a new device from connecting to the router.
+* Provides the option to block a new device from connecting to the router, immediately or after some time has passed.
 * Persists what devices have been seen and what has been blocked between sessions.
+* Allows an icon to be assigned to a device to help people identify them.
 
 ## Requirements
 
@@ -161,15 +162,15 @@ It also:
 1. Clone this repository with `git clone https://github.com/Choice-IF-Collaborations/map-router-app.git`.
 2. Move into the repository folder with `cd map-router-app`.
 3. Run `npm install` to download it's dependencies.
-4. Run `touch known.txt blacklist.txt` to create blank database files.
+4. Run `cp router.db.empty router.db` to create a blank database file.
 
 ## Usage
 
 * The Wi-Fi access point should be immediately usable.
 * The app is started by running `sudo node index.js` inside the repository. It must be run as `sudo` allow device blocking to work.
 * The interface can be accessed in Chromium at `http://localhost:3000`.
-* The database files can be reset by running `rm -rf blacklist.txt known.txt && touch blacklist.txt known.txt`.
-* This file changes `/etc/dhcp/dhcpd.conf` to block devices.
+* The database file can be reset by running `cp router.db.empty router.db` again and can be edited on macOS with [DB Browser for SQLite](http://sqlitebrowser.org).
+* This file changes `/etc/dhcp/dhcpd.conf` to block devices and reads `/var/lib/dhcp/dhcpd.leases` to get hostnames.
 
 ## References
 
