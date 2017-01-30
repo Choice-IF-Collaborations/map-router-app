@@ -146,6 +146,32 @@ $(window).load(function() {
     }
   });
 
+  $('body').on('click', '.snooze_choices a', function(e) {
+    e.preventDefault();
+
+    let $parent = $(this).parent().parent().parent().parent()
+    let mac_address = $parent.attr('data-mac-address');
+    let snooze_period = $(this).attr('data-snooze-period');
+
+    console.log(mac_address);
+    console.log(snooze_period);
+
+    $.ajax({
+      type: "POST",
+      url: "/snooze",
+      data: {
+        mac_address: mac_address,
+        type: $parent.attr('data-type'),
+        snooze_period: snooze_period
+      },
+      success: function() {
+        $parent.fadeOut(250, function() {
+          $parent.remove();
+        });
+      }
+    });
+  });
+
   // FUNCTIONS
   function updateConnectedDevices(data) {
     $('#refresh_button').text("Refreshing...");
@@ -201,6 +227,7 @@ $(window).load(function() {
 
       let $notificationTemplate = $('#notification_template').clone();
       $notificationTemplate.attr('id', 'notification_' + notificationCounter);
+      $notificationTemplate.attr('data-mac-address', data.mac_address);
       $notificationTemplate.find('.device_name').text(data.hostname);
       $notificationTemplate.find('.ignore_device').attr('data-mac-address', data.mac_address);
       $notificationTemplate.find('.remove_device').attr('data-mac-address', data.mac_address);

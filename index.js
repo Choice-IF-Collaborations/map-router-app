@@ -42,24 +42,42 @@ app.post('/remove', function(req, res) {
 
   removeClient(mac_address);
 
-  db.run("INSERT INTO devices(type, mac_address, timestamp_connected, is_blocked, snooze_period) VALUES($type, $mac_address, $timestamp_connected, $is_blocked, $snooze_period)", {
+  db.run("INSERT INTO devices(type, mac_address, timestamp_connected, is_blocked, snooze_period, timestamp_snooze) VALUES($type, $mac_address, $timestamp_connected, $is_blocked, $snooze_period, $timestamp_snooze)", {
     $type: req.body.type,
     $mac_address: mac_address,
     $timestamp_connected: Math.floor(Date.now() / 1000),
     $is_blocked: 1,
-    $snooze_period: 0
+    $snooze_period: 0,
+    $timestamp_snooze: 0
   }, function() {
     res.sendStatus(200);
   });
 });
 
 app.post('/ignore', function(req, res) {
-  db.run("INSERT INTO devices(type, mac_address, timestamp_connected, is_blocked, snooze_period) VALUES($type, $mac_address, $timestamp_connected, $is_blocked, $snooze_period)", {
+  db.run("INSERT INTO devices(type, mac_address, timestamp_connected, is_blocked, snooze_period, timestamp_snooze) VALUES($type, $mac_address, $timestamp_connected, $is_blocked, $snooze_period, $timestamp_snooze)", {
     $type: req.body.type,
     $mac_address: req.body.mac_address,
     $timestamp_connected: Math.floor(Date.now() / 1000),
     $is_blocked: 0,
-    $snooze_period: 0
+    $snooze_period: 0,
+    $timestamp_snooze: 0
+  }, function() {
+    res.sendStatus(200);
+  });
+});
+
+app.post('/snooze', function(req, res) {
+  let timestamp = Math.floor(Date.now() / 1000);
+  let timestamp_snooze = parseInt(req.body.snooze_period) + timestamp;
+
+  db.run("INSERT INTO devices(type, mac_address, timestamp_connected, is_blocked, snooze_period, timestamp_snooze) VALUES($type, $mac_address, $timestamp_connected, $is_blocked, $snooze_period, $timestamp_snooze)", {
+    $type: req.body.type,
+    $mac_address: req.body.mac_address,
+    $timestamp_connected: timestamp,
+    $is_blocked: 0,
+    $snooze_period: req.body.snooze_period,
+    $timestamp_snooze: timestamp_snooze
   }, function() {
     res.sendStatus(200);
   });
@@ -75,6 +93,7 @@ app.post('/unremove', function(req, res) {
       // Restart DHCP server
       child.execFile('service', ['isc-dhcp-server', 'restart'], function(err, stdout, stderr) {
         console.log('unblocked ' + mac_address);
+        res.sendStatus(200);
       });
     });
   });
@@ -336,10 +355,32 @@ function removeClient(mac_address) {
   fs.appendFile('/etc/dhcp/dhcpd.conf', 'host block-me { hardware ethernet ' + mac_address + '; deny booting; }\n', function() {
     child.execFile('service', ['isc-dhcp-server', 'restart'], function(err, stdout, stderr) {
       child.execFile('hostapd_cli', ['deauthenticate', mac_address], function(err, stdout, stderr) {
+        console.log("mac address removed: " + mac_address);
       });
     });
   });
 }
+
+// SNOOZE
+setInterval(function() {
+  console.log("propogating timeouts");
+
+  db.all("SELECT * FROM devices WHERE snooze_period > 0", function(err, rows) {
+    for (let row in rows) {
+      let device = rows[row];
+      let now = Math.floor(Date.now() / 1000);
+
+      if (now > device['timestamp_snooze']) {
+        db.run('UPDATE devices SET is_blocked="1", snooze_period="0" WHERE mac_address="' + device['mac_address'] + '"', function() {
+          console.log("timeout finished, database updated");
+          removeClient(device['mac_address']);
+        });
+      }
+    }
+  });
+
+  console.log("------");
+}, 5000);
 
 // SERVER
 http.listen(app.get('port'), function() {
