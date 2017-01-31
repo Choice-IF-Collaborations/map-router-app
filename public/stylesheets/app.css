@@ -173,13 +173,15 @@ h2 {
   display: flex;
   justify-content: center;
   align-items: center; }
-  .notification div {
-    overflow: auto; }
+  .notification .main {
+    width: 100%;
+    background: red; }
   .notification .icon {
     width: calc(33.333% - 1em);
     float: left;
     margin-right: 1em;
-    overflow: hidden !important; }
+    overflow: hidden !important;
+    text-align: center; }
     .notification .icon img {
       height: 9em; }
     .notification .icon .choose_icon {
@@ -192,13 +194,6 @@ h2 {
   .notification .details {
     width: 66.666%;
     float: left; }
-    .notification .details .snooze_choices {
-      display: none; }
-      .notification .details .snooze_choices p {
-        margin-bottom: 1em !important; }
-      .notification .details .snooze_choices a {
-        float: left;
-        margin-bottom: 6px; }
     .notification .details h2 {
       font-size: 1.2em;
       line-height: 1.2em;
@@ -207,64 +202,56 @@ h2 {
     .notification .details p {
       line-height: 1.2em;
       margin-bottom: 2em; }
-      .notification .details p:last-of-type {
-        margin-bottom: 0; }
-      .notification .details p .options_container {
-        width: 500px;
-        height: 50px; }
-      .notification .details p .remove_device,
-      .notification .details p .ignore_device,
-      .notification .details p .snooze_device {
-        color: #FFF;
-        width: calc((100% / 3) - 10px);
+    .notification .details .options_view .options {
+      width: 500px;
+      height: 50px; }
+      .notification .details .options_view .options .button {
+        width: 150px;
         float: left; }
-  .notification .choose_icon_view {
-    background: #FFF;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: calc(800px - 4em);
-    height: calc(478px - 4em);
-    padding: 2em;
-    display: none; }
-    .notification .choose_icon_view p {
-      text-align: center;
-      margin-bottom: 2em;
-      font-weight: 700; }
-    .notification .choose_icon_view .icons {
-      overflow: auto;
-      width: 670px;
-      margin-left: auto;
-      margin-right: auto;
-      margin-bottom: 2em; }
-      .notification .choose_icon_view .icons a {
-        display: block;
-        margin-right: 5px;
-        float: left;
-        width: 120px;
-        height: 120px;
-        border: rgba(128, 128, 128, 0) 3px solid;
-        background-position: center center;
-        background-size: 90% 90%;
-        background-repeat: no-repeat;
-        text-indent: -9999px; }
-        .notification .choose_icon_view .icons a:last-child {
+        .notification .details .options_view .options .button:last-child {
           margin-right: 0; }
-        .notification .choose_icon_view .icons a.selected {
-          border: gray 3px solid; }
-        .notification .choose_icon_view .icons a.laptop {
-          background-image: url("/public/images/symbol-laptop.svg"); }
-        .notification .choose_icon_view .icons a.desktop {
-          background-image: url("/public/images/symbol-desktop.svg"); }
-        .notification .choose_icon_view .icons a.tablet {
-          background-image: url("/public/images/symbol-tablet.svg"); }
-        .notification .choose_icon_view .icons a.phone {
-          background-image: url("/public/images/symbol-phone.svg"); }
-        .notification .choose_icon_view .icons a.tv {
-          background-image: url("/public/images/symbol-tv.svg"); }
-    .notification .choose_icon_view .close_icon_view {
-      margin-left: auto;
-      margin-right: auto; }
+    .notification .details .options_view .snooze_choices {
+      display: none; }
+      .notification .details .options_view .snooze_choices p {
+        margin-bottom: 1em !important; }
+      .notification .details .options_view .snooze_choices a {
+        float: left;
+        margin-bottom: 6px; }
+    .notification .details .icons_view {
+      display: none; }
+      .notification .details .icons_view .options .button {
+        float: left; }
+      .notification .details .icons_view .icons {
+        overflow: auto;
+        width: 480px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 2em; }
+        .notification .details .icons_view .icons a {
+          display: block;
+          margin-right: 5px;
+          float: left;
+          width: 85px;
+          height: 85px;
+          border: rgba(128, 128, 128, 0) 3px solid;
+          background-position: center center;
+          background-size: 90% 90%;
+          background-repeat: no-repeat;
+          text-indent: -9999px; }
+          .notification .details .icons_view .icons a:last-child {
+            margin-right: 0; }
+          .notification .details .icons_view .icons a.selected {
+            border: gray 3px solid; }
+          .notification .details .icons_view .icons a.laptop {
+            background-image: url("/public/images/symbol-laptop.svg"); }
+          .notification .details .icons_view .icons a.desktop {
+            background-image: url("/public/images/symbol-desktop.svg"); }
+          .notification .details .icons_view .icons a.tablet {
+            background-image: url("/public/images/symbol-tablet.svg"); }
+          .notification .details .icons_view .icons a.phone {
+            background-image: url("/public/images/symbol-phone.svg"); }
+          .notification .details .icons_view .icons a.tv {
+            background-image: url("/public/images/symbol-tv.svg"); }
 
 .button {
   background-color: #808080;

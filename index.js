@@ -24,6 +24,16 @@ let listBlockedDevices = [];
 let infoRouter = "";
 let infoPassword = "";
 
+// CONFIG
+app.set('port', process.env.PORT || 3000);
+app.set('view engine', 'jade');
+app.use('/public', express.static(path.join(__dirname, 'public')));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+
+// START
 // Get router information
 child.execFile('cat', ['/etc/hostapd/hostapd.conf'], function(err, stdout, stderr) {
   let hostapd = stdout.split('\n');
@@ -38,15 +48,6 @@ child.execFile('cat', ['/etc/hostapd/hostapd.conf'], function(err, stdout, stder
     }
   }
 });
-
-// CONFIG
-app.set('port', process.env.PORT || 3000);
-app.set('view engine', 'jade');
-app.use('/public', express.static(path.join(__dirname, 'public')));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
-  extended: true
-}));
 
 // ROUTES
 // Render the app view
@@ -123,6 +124,8 @@ io.on('connection', function (socket) {
   });
 });
 
+// FUNCTIONS
+// Get latest information
 function update() {
   async.series([
     function(callback) {
@@ -259,7 +262,7 @@ function update() {
 
       for (let device in listConnectedDevices) {
         let mac_address = listConnectedDevices[device];
-        let hostname = "[UNKNOWN]";
+        let hostname = "A device";
         let timestamp_connected = null;
         let type = null;
         let is_blocked = null;
@@ -303,7 +306,7 @@ function update() {
       db.all("SELECT * FROM devices WHERE is_blocked='1'", function(err, rows) {
         for (let row in rows) {
           row = rows[row];
-          let hostname = "[UNKNOWN]";
+          let hostname = "A device";
           let type = row['type'];
           let mac_address = row['mac_address'];
 
@@ -333,6 +336,7 @@ function update() {
   ]);
 }
 
+// Create notifications
 function createNewDeviceNotifications() {
   // Iterate through each connected device
   for (let device in listConnectedDevices) {
@@ -351,7 +355,7 @@ function createNewDeviceNotifications() {
           if (rows.length > 0) {
             hostname = rows[0]['hostname'];
           } else {
-            hostname = "[unknown]";
+            hostname = "A device";
           }
 
           // Send notifications to the router UI
@@ -365,6 +369,7 @@ function createNewDeviceNotifications() {
   }
 }
 
+// Block a client
 function removeClient(mac_address) {
   // Append line to dhcpd.conf to prevent blocked MAC address
   // from getting a new IP address after disconnect
@@ -376,7 +381,7 @@ function removeClient(mac_address) {
   });
 }
 
-// SNOOZE
+// Monitor for when snooze periods have finished
 setInterval(function() {
   db.all("SELECT * FROM devices WHERE snooze_period > 0", function(err, rows) {
     for (let row in rows) {

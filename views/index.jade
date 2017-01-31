@@ -28,27 +28,28 @@ html(lang="en")
       div(class="main")
         div(class="icon")
           img(src="/public/images/notification_icon.png")
-          a(href="#" class="choose_icon") Choose icon
         div(class="details")
           h2 #[span(class="device_name") –] has just connected to your router
-          p If you don't recognise this device, you can remove it from your network.
-          p(class="options_container")
-            a(href="#" class="ignore_device button") Ignore
-            a(href="#" class="remove_device button") Block Now
-            a(href="#" class="snooze_device button") Block Later
-          div(class="snooze_choices")
-            p Block this device after:
-            a(href="#" data-snooze-period="900" class="button") 15 minutes
-            a(href="#" data-snooze-period="3600" class="button") 1 hour
-            a(href="#" data-snooze-period="14400" class="button") 4 hours
-            a(href="#" data-snooze-period="28800" class="button") 8 hours
-            a(href="#" data-snooze-period="86400" class="button") 24 hours
-      div(class="choose_icon_view")
-        p Choose an icon for #[span(class="device_name") –]
-        div(class="icons")
-          a(href="#" class="laptop") Laptop
-          a(href="#" class="desktop") Desktop
-          a(href="#" class="tablet") Tablet
-          a(href="#" class="phone") Phone
-          a(href="#" class="tv") TV
-        a(href="#" class="close_icon_view button") Done
+          div(class="options_view")
+            p If you don't recognise this device, you can block it from your network.
+            div(class="options")
+              a(href="#" class="ignore_device button") Ignore
+              a(href="#" class="remove_device button") Block Now
+              a(href="#" class="snooze_device button") Block Later
+            div(class="snooze_choices")
+              p Block this device after:
+              a(href="#" data-snooze-period="900" class="button") 15 minutes
+              a(href="#" data-snooze-period="3600" class="button") 1 hour
+              a(href="#" data-snooze-period="14400" class="button") 4 hours
+              a(href="#" data-snooze-period="28800" class="button") 8 hours
+              a(href="#" data-snooze-period="86400" class="button") 24 hours
+          div(class="icons_view")
+            p Select an icon for this device
+            div(class="icons")
+              a(href="#" class="laptop") Laptop
+              a(href="#" class="desktop") Desktop
+              a(href="#" class="tablet") Tablet
+              a(href="#" class="phone") Phone
+              a(href="#" class="tv") TV
+            div(class="options")
+              a(href="#" class="notification_done button") Done

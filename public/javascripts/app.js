@@ -9,6 +9,12 @@ $(window).load(function() {
   // Fetch information when page first loaded
   socket.emit('update_call', null);
 
+  // Poll for new information
+  setInterval(function() {
+    socket.emit('update_call', null);
+  }, 5000);
+
+  // Update last updated counter
   setInterval(function() {
     lastUpdatedSecs++;
 
@@ -19,29 +25,26 @@ $(window).load(function() {
     }
   }, 1000);
 
-  // Poll for new information
-  setInterval(function() {
-    socket.emit('update_call', null);
-  }, 5000);
-
   // SOCKET.IO
   // Receive new device notifications and draw them
+  // Create notification for new device
   socket.on('new_device', function (data) {
     createNotification(data);
   });
 
-  // Receive new device information and display it
+  // Update list of connected devices
   socket.on('update_connected', function(data) {
     updateConnectedDevices(data);
     lastUpdatedSecs = 0;
   });
 
+  // Update list of blocked devices
   socket.on('update_blocked', function(data) {
     updateBlockedDevices(data);
   });
 
   // EVENTS
-  // Refresh button
+  // Navigation
   $('#nav a').click(function(e) {
     e.preventDefault();
 
@@ -68,27 +71,22 @@ $(window).load(function() {
     }
   });
 
-  $('#refresh_button').click(function(e) {
-    e.preventDefault();
-    socket.emit('update_call', null);
-  });
-
-  // Remove device
+  // Block device
   $('body').on('click', '.remove_device', function(e) {
     e.preventDefault();
 
-    let $parent = $(this).parent().parent().parent().parent();
+    let $notification = $(this).parent().parent().parent().parent();
 
     $.ajax({
       type: "POST",
       url: "/remove",
       data: {
         mac_address: $(this).attr('data-mac-address'),
-        type: $parent.attr('data-type')
+        type: $notification.attr('data-type')
       },
       success: function() {
-        $parent.fadeOut(250, function() {
-          $parent.remove();
+        $notification.fadeOut(250, function() {
+          $notification.remove();
         });
       }
     });
@@ -98,90 +96,112 @@ $(window).load(function() {
   $('body').on('click', '.ignore_device', function(e) {
     e.preventDefault();
 
-    let $parent = $(this).parent().parent().parent().parent();
+    let $notification = $(this).parent().parent().parent().parent().parent();
 
-    $.ajax({
-      type: "POST",
-      url: "/ignore",
-      data: {
-        mac_address: $(this).attr('data-mac-address'),
-        type: $parent.attr('data-type')
-      },
-      success: function() {
-        $parent.fadeOut(250, function() {
-          $parent.remove();
-        });
-      }
+    $notification.attr('data-action', 'ignore');
+
+    $notification.find('.options_view').fadeOut(250, function() {
+      $notification.find('.icons_view').fadeIn();
     });
   });
 
-  // Block later
+  // Snooze device
   $('body').on('click', '.snooze_device', function(e) {
     e.preventDefault();
 
-    let $notification = $(this).parent().parent().parent().parent();
+    let $notification = $(this).parent().parent().parent().parent().parent();;
 
-    $notification.find('.options_container').fadeOut(250, function() {
-      $notification.find('.snooze_choices').fadeIn(250);
+    $notification.attr('data-action', 'snooze');
+
+    $notification.find('.options_view .options').fadeOut(250, function() {
+      $notification.find('.options_view .snooze_choices').fadeIn(250);
     });
   });
 
-  $('body').on('click', '.choose_icon', function(e) {
+  // Select snooze period
+  $('body').on('click', '.snooze_choices a', function(e) {
     e.preventDefault();
 
-    let $parent = $(this).parent().parent().parent().parent();
+    let $notification = $(this).parent().parent().parent().parent().parent();
+    let mac_address = $parent.attr('data-mac-address');
+    let snooze_period = $(this).attr('data-snooze-period');
 
-    $parent.find('.choose_icon_view').fadeIn(250);
+    $notification.attr('data-snooze-period', snooze_period);
 
+    $notification.find('.options_view').fadeOut(250, function() {
+      $notification.find('.icons_view').fadeIn();
+    });
   });
 
-  $('body').on('click', '.choose_icon_view .icons a', function(e) {
+  // Choose icon
+  $('body').on('click', '.icons_view .icons a', function(e) {
     e.preventDefault();
 
     let type = $(this).text().toLowerCase();
-    let $notification = $(this).parent().parent().parent();
+    let $notification = $(this).parent().parent().parent().parent().parent();
 
     // Update UI
     $(this).parent().find('a').removeClass('selected');
     $(this).addClass('selected');
-    $notification.find('.icon img').attr('src', '/public/images/symbol-' + type + '.svg');
 
     // Append device type to notification
-    $notification.attr('data-type', type)
+    $notification.attr('data-type', type);
   });
 
-  $('body').on('click', '.choose_icon_view .close_icon_view', function(e) {
+  // Dismiss notification after choosing icon
+  $('body').on('click', '.notification_done', function(e) {
     e.preventDefault();
 
-    $notification = $(this).parent().parent();
-    let type = $notification.attr('data-type');
+    let $notification = $(this).parent().parent().parent().parent().parent();
+    let action = $notification.attr('data-action');
 
-    if (type !== "unknown") {
-      $notification.find('.choose_icon_view').fadeOut(250);
-    } else {
-      return
+    if (action === "ignore") {
+      $.ajax({
+        type: "POST",
+        url: "/ignore",
+        data: {
+          mac_address: $notification.attr('data-mac-address'),
+          type: $notification.attr('data-type')
+        },
+        success: function() {
+          $notification.fadeOut(250, function() {
+            $notification.remove();
+          });
+        }
+      });
+    } else if (action === "snooze") {
+      $.ajax({
+        type: "POST",
+        url: "/snooze",
+        data: {
+          mac_address: $notification.attr('data-mac-address'),
+          type: $notification.attr('data-type'),
+          snooze_period: $notification.attr('data-snooze-period')
+        },
+        success: function() {
+          $notification.fadeOut(250, function() {
+            $notification.remove();
+          });
+        }
+      });
     }
   });
 
-  $('body').on('click', '.snooze_choices a', function(e) {
+  // Unblock device
+  $('body').on('click', '#blocked_devices_list .device a', function(e) {
     e.preventDefault();
 
-    let $parent = $(this).parent().parent().parent().parent()
-    let mac_address = $parent.attr('data-mac-address');
-    let snooze_period = $(this).attr('data-snooze-period');
+    let device_icon = $(this).parent();
+    let mac_address = $(this).parent().attr('data-mac-address');
 
     $.ajax({
       type: "POST",
-      url: "/snooze",
+      url: "/unremove",
       data: {
-        mac_address: mac_address,
-        type: $parent.attr('data-type'),
-        snooze_period: snooze_period
+        mac_address: mac_address
       },
       success: function() {
-        $parent.fadeOut(250, function() {
-          $parent.remove();
-        });
+        device_icon.remove();
       }
     });
   });
@@ -214,24 +234,6 @@ $(window).load(function() {
     }
   }
 
-  $('body').on('click', '#blocked_devices_list .device a', function(e) {
-    e.preventDefault();
-
-    let device_icon = $(this).parent();
-    let mac_address = $(this).parent().attr('data-mac-address');
-
-    $.ajax({
-      type: "POST",
-      url: "/unremove",
-      data: {
-        mac_address: mac_address
-      },
-      success: function() {
-        device_icon.remove();
-      }
-    });
-  });
-
   function createNotification(data) {
     if (notifications.indexOf(data.mac_address) == -1) {
       notifications.push(data.mac_address);
@@ -249,4 +251,6 @@ $(window).load(function() {
       $('#notifications').append($notificationTemplate);
     }
   }
+
+  createNotification({ mac_address: '12:34:56:78', hostname: 'A device' });
 });
