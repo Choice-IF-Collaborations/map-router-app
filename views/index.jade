@@ -1,7 +1,7 @@
 doctype html
 html(lang="en")
   head
-    title IF–CHOICE Connected Devices
+    title CHOICE Router App
     meta(name="viewport" charset="utf-8" content="width=device-width" initial-scale="1.0")
     script(type="text/javascript" src="/public/javascripts/jquery.js")
     script(type="text/javascript" src="/public/javascripts/socket.io.js")
@@ -11,9 +11,10 @@ html(lang="en")
     div(id="container")
       div(id="connected_devices" class="view")
         div(id="connected_devices_list" class="list")
-        //p(id="last_updated") Last updated #[span(id="last_updated_num") 0 seconds] ago
+        p(id="last_updated" class="helper") Last updated #[span(id="last_updated_num") 0 seconds] ago
       div(id="blocked_devices" class="view")
         div(id="blocked_devices_list" class="list")
+        p(class="helper") Tap a device to unblock it
       div(id="router_information" class="view")
         div
           p Network name: #{infoRouter}
@@ -27,30 +28,27 @@ html(lang="en")
       div(class="main")
         div(class="icon")
           img(src="/public/images/notification_icon.png")
+          a(href="#" class="choose_icon") Choose icon
         div(class="details")
           h2 #[span(class="device_name") –] has just connected to your router
           p If you don't recognise this device, you can remove it from your network.
-          p
-            a(href="#" class="ignore_device") Ignore
-            a(href="#" class="remove_device") Block
-          p
-            a(href="#" class="choose_icon") Choose icon
-          p(class="snooze_choices")
-            span Snooze
-            a(href="#" data-snooze-period="20") 20 seconds
-            a(href="#" data-snooze-period="900") 15 minutes
-            a(href="#" data-snooze-period="3600") 1 hour
-            a(href="#" data-snooze-period="14400") 4 hours
-            a(href="#" data-snooze-period="28800") 8 hours
-            a(href="#" data-snooze-period="86400") 24 hours
+          p(class="options_container")
+            a(href="#" class="ignore_device button") Ignore
+            a(href="#" class="remove_device button") Block Now
+            a(href="#" class="snooze_device button") Block Later
+          div(class="snooze_choices")
+            p Block this device after:
+            a(href="#" data-snooze-period="900" class="button") 15 minutes
+            a(href="#" data-snooze-period="3600" class="button") 1 hour
+            a(href="#" data-snooze-period="14400" class="button") 4 hours
+            a(href="#" data-snooze-period="28800" class="button") 8 hours
+            a(href="#" data-snooze-period="86400" class="button") 24 hours
       div(class="choose_icon_view")
-        p Choose an icon
-        
+        p Choose an icon for #[span(class="device_name") –]
         div(class="icons")
           a(href="#" class="laptop") Laptop
           a(href="#" class="desktop") Desktop
           a(href="#" class="tablet") Tablet
           a(href="#" class="phone") Phone
           a(href="#" class="tv") TV
-        
-        a(href="#" class="close_icon_view") Confirm
+        a(href="#" class="close_icon_view button") Done

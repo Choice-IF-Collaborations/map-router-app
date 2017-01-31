@@ -115,6 +115,17 @@ $(window).load(function() {
     });
   });
 
+  // Block later
+  $('body').on('click', '.snooze_device', function(e) {
+    e.preventDefault();
+
+    let $notification = $(this).parent().parent().parent().parent();
+
+    $notification.find('.options_container').fadeOut(250, function() {
+      $notification.find('.snooze_choices').fadeIn(250);
+    });
+  });
+
   $('body').on('click', '.choose_icon', function(e) {
     e.preventDefault();
 
@@ -133,6 +144,7 @@ $(window).load(function() {
     // Update UI
     $(this).parent().find('a').removeClass('selected');
     $(this).addClass('selected');
+    $notification.find('.icon img').attr('src', '/public/images/symbol-' + type + '.svg');
 
     // Append device type to notification
     $notification.attr('data-type', type)
