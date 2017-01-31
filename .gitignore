@@ -38,6 +38,4 @@ jspm_packages
 
 .DS_Store
 .AppleDouble
-
-public/stylesheets/app.css
 router.db
