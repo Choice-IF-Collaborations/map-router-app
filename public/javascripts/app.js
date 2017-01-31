@@ -75,7 +75,7 @@ $(window).load(function() {
   $('body').on('click', '.remove_device', function(e) {
     e.preventDefault();
 
-    let $notification = $(this).parent().parent().parent().parent();
+    let $notification = $(this).parent().parent().parent().parent().parent();
 
     $.ajax({
       type: "POST",
@@ -123,7 +123,7 @@ $(window).load(function() {
     e.preventDefault();
 
     let $notification = $(this).parent().parent().parent().parent().parent();
-    let mac_address = $parent.attr('data-mac-address');
+    let mac_address = $notification.attr('data-mac-address');
     let snooze_period = $(this).attr('data-snooze-period');
 
     $notification.attr('data-snooze-period', snooze_period);
@@ -217,6 +217,10 @@ $(window).load(function() {
       device = data[device];
 
       if (device.is_blocked === 0) {
+        if (device.hostname === "A device") {
+          device.hostname = device.type.charAt(0).toUpperCase() + device.type.slice(1);
+        }
+
         $('#connected_devices_list').append('<div class="device ' + device.type + '">' + device.hostname + "</div>");
       }
     }
@@ -229,6 +233,10 @@ $(window).load(function() {
 
     for (let device in data) {
       device = data[device];
+
+      if (device.hostname === "A device") {
+        device.hostname = device.type.charAt(0).toUpperCase() + device.type.slice(1);
+      }
 
       $('#blocked_devices_list').append('<div class="device ' + device.type + '" data-mac-address="' + device.mac_address + '"><a href="#">' + device.hostname + "</a></div>");
     }
@@ -251,6 +259,4 @@ $(window).load(function() {
       $('#notifications').append($notificationTemplate);
     }
   }
-
-  createNotification({ mac_address: '12:34:56:78', hostname: 'A device' });
 });
