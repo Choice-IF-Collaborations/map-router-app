@@ -174,8 +174,7 @@ h2 {
   justify-content: center;
   align-items: center; }
   .notification .main {
-    width: 100%;
-    background: red; }
+    width: 100%; }
   .notification .icon {
     width: calc(33.333% - 1em);
     float: left;
